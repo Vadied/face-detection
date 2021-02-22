@@ -1,18 +1,20 @@
 import React from "react";
 import "./_imageLinkForm.scss";
 
-const ImageLinkForm = () => {
+const ImageLinkForm = ({onInputChange, onButtonSubmit}) => {
   return (
     <div className="image-link-form">
         <p>
             {'This kraken will find faces in your pictures. '}
         </p>
-        <div>
           <div className="form-input">
-              <input type="text"/>
-              <div className="btn">Detect</div>
+              <input 
+                type="text" 
+                onChange={onInputChange}/>
+              <div
+                className="btn"
+                onClick={onButtonSubmit}>Detect</div>
           </div>
-        </div>
     </div>
   );
 };
