@@ -6,6 +6,7 @@ import reportWebVitals from './reportWebVitals';
 
 ReactDOM.render(
   <React.StrictMode>
+    <script src="https://cdn.rawgit.com/progers/pathseg/master/pathseg.js"></script>
     <App />
   </React.StrictMode>,
   document.getElementById('root')
