@@ -1,0 +1,8 @@
+{
+  "exampleUrl": "https://deadline.com/wp-content/uploads/2019/06/tasha-smith-1.jpg",
+  "routes": {
+    "signIn": "signIn",
+    "register": "register",
+    "home": "home"
+  }
+}

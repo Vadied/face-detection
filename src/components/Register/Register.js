@@ -1,38 +1,38 @@
 import React from "react";
 import { Form, Button } from "react-bootstrap";
-import "./_signIn.scss";
+import "./_register.scss";
 
 import { routes } from "../../Constants";
 
-const SignIn = ({ onRouteChange }) => {
+const Register = ({ onRouteChange }) => {
   return (
-    <div className="sign-in">
+    <div className="register">
       <Form>
-        <Form.Group controlId="formBasicEmail">
+        <Form.Group controlId="name">
+          <Form.Label>Name</Form.Label>
+          <Form.Control type="email" placeholder="Enter name" />
+        </Form.Group>
+
+        <Form.Group controlId="email">
           <Form.Label>Email</Form.Label>
           <Form.Control type="email" placeholder="Enter email" />
         </Form.Group>
 
-        <Form.Group controlId="formBasicPassword">
+        <Form.Group controlId="password">
           <Form.Label>Password</Form.Label>
           <Form.Control type="password" placeholder="Password" />
         </Form.Group>
+
         <Button
           variant="primary"
           type="submit"
           onClick={() => onRouteChange(routes.home)}
         >
-          Sign In
+          Register
         </Button>
-
-        <Form.Group controlId="formRegister">
-          <Form.Text onClick={() => onRouteChange(routes.register)}>
-            Register
-          </Form.Text>
-        </Form.Group>
       </Form>
     </div>
   );
 };
 
-export default SignIn;
+export default Register;
