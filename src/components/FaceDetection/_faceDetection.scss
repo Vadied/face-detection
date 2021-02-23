@@ -1,0 +1,23 @@
+.face-detection {
+  display: flex;
+  justify-content: center;
+
+  .face-container {
+    position: absolute;
+    margin-top: 10px;
+
+    img {
+      width: 400px;
+      height: auto;
+    }
+
+    .bounding-box {
+        position: absolute;
+        box-shadow:  0 0 0 5px yellow inset;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        cursor: pointer;
+    }
+  }
+}
