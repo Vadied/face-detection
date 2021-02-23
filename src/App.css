@@ -1,8 +1,4 @@
 .App {
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-  text-align: center;
 }
 
 .particles {
@@ -12,4 +8,14 @@
   bottom: 0;
   left: 0;
   z-index: -1;
+}
+
+.center {
+  display: flex;
+  align-items: center;
+  text-align: center;
+}
+
+.center.column-center {
+  flex-direction: column;
 }

@@ -4,16 +4,18 @@ import Particles from "react-particles-js";
 import Clarifai, { GENERAL_MODEL } from "clarifai";
 import { get } from "lodash";
 
+import { routes, clarifai_Api_Key } from "./Constants";
+
 import Navigation from "./components/Navigation/Navigation";
 import Logo from "./components/Logo/Logo";
 import ImageLinkForm from "./components/ImageLinkForm/ImageLinkForm";
 import Rank from "./components/Rank/Rank";
 import FaceDetection from "./components/FaceDetection/FaceDetection";
 import SignIn from "./components/SignIn/SignIn";
+import Register from "./components/Register/Register";
 
-const clarifaiApiKey = "294ce2f7ef164bf68dde68488f99f5b1";
 const app = new Clarifai.App({
-  apiKey: clarifaiApiKey,
+  apiKey: clarifai_Api_Key,
 });
 
 const particlesParams = {
@@ -27,14 +29,6 @@ const particlesParams = {
     },
   },
 };
-
-const routes = {
-  signIn: 'signIn'
-}
-
-const exampleUrl =
-  "https://deadline.com/wp-content/uploads/2019/06/tasha-smith-1.jpg";
-
 class App extends Component {
   constructor() {
     super();
@@ -42,19 +36,19 @@ class App extends Component {
       input: "",
       imageUrl: "",
       box: {},
-      route: routes.signIn
+      route: routes.signIn,
+      isSignedIn: false,
     };
   }
 
-  clearState = () => {
+  clearState = () =>
     this.setState({
       input: "",
       imageUrl: "",
       box: {},
     });
-  };
 
-  calculateFaceLocation = region => {
+  calculateFaceLocation = (region) => {
     const coordinates = get(region[0], "region_info.bounding_box", {});
     const image = document.getElementById("input-image");
     const width = image.width;
@@ -67,9 +61,9 @@ class App extends Component {
     };
   };
 
-  displayFaceBox = box => this.setState({ box });
+  displayFaceBox = (box) => this.setState({ box });
 
-  onInputChange = event => this.setState({ input: event.target.value });
+  onInputChange = (event) => this.setState({ input: event.target.value });
 
   onSubmit = async () => {
     this.setState({ imageUrl: this.state.input });
@@ -85,22 +79,42 @@ class App extends Component {
     this.displayFaceBox(box);
   };
 
-  render() {
+  onRouteChange = (route) => {
+    this.setState({ 
+      route,
+      isSignedIn: route !== routes.signIn && route !== routes.register
+    });
+  };
+
+  showApp = () => {
+    if (this.state.route === routes.signIn)
+      return <SignIn onRouteChange={this.onRouteChange} />;
+
+    if (this.state.route === routes.register)
+      return <Register onRouteChange={this.onRouteChange} />;
+
     return (
-      <div className="App">
-        <Particles className="particles" params={particlesParams} />
-        <Navigation />
-        { this,state,route === routes.signIn ? 
-        <SignIn /> : 
+      <div className="center column-center">
         <Logo />
-        <SignIn />
         <Rank />
         <ImageLinkForm
           onInputChange={this.onInputChange}
           onButtonSubmit={this.onSubmit}
         />
         <FaceDetection imageUrl={this.state.imageUrl} box={this.state.box} />
-        }
+      </div>
+    );
+  };
+
+  render() {
+    return (
+      <div className="App center column-center">
+        <Particles className="particles" params={particlesParams} />
+        <Navigation
+          onRouteChange={this.onRouteChange}
+          isSignedIn={this.state.isSignedIn}
+        />
+        {this.showApp()}
       </div>
     );
   }
