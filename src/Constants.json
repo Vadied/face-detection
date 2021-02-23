@@ -4,5 +4,6 @@
     "signIn": "signIn",
     "register": "register",
     "home": "home"
-  }
+  },
+  "clarifai_Api_Key": "294ce2f7ef164bf68dde68488f99f5b1"
 }

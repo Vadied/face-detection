@@ -4,7 +4,7 @@ import Particles from "react-particles-js";
 import Clarifai, { GENERAL_MODEL } from "clarifai";
 import { get } from "lodash";
 
-import { routes } from "./Constants";
+import { routes, clarifai_Api_Key } from "./Constants";
 
 import Navigation from "./components/Navigation/Navigation";
 import Logo from "./components/Logo/Logo";
@@ -14,9 +14,8 @@ import FaceDetection from "./components/FaceDetection/FaceDetection";
 import SignIn from "./components/SignIn/SignIn";
 import Register from "./components/Register/Register";
 
-const clarifaiApiKey = "294ce2f7ef164bf68dde68488f99f5b1";
 const app = new Clarifai.App({
-  apiKey: clarifaiApiKey,
+  apiKey: clarifai_Api_Key,
 });
 
 const particlesParams = {
