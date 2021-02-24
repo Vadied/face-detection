@@ -30,6 +30,7 @@ const particlesParams = {
   },
 };
 class App extends Component {
+
   constructor() {
     super();
     this.state = {
@@ -38,15 +39,21 @@ class App extends Component {
       box: {},
       route: routes.signIn,
       isSignedIn: false,
+      user: {
+        id: "",
+        name: "",
+        email: "",
+        joined: '',
+        entries: 0
+      }
     };
   }
 
-  clearState = () =>
-    this.setState({
-      input: "",
-      imageUrl: "",
-      box: {},
-    });
+  clearState = () => this.setState({
+                      input: "",
+                      imageUrl: "",
+                      box: {},
+                    });
 
   calculateFaceLocation = (region) => {
     const coordinates = get(region[0], "region_info.bounding_box", {});
@@ -86,17 +93,19 @@ class App extends Component {
     });
   };
 
+  loadUser = user => this.setState({ user });
+
   showApp = () => {
     if (this.state.route === routes.signIn)
-      return <SignIn onRouteChange={this.onRouteChange} />;
+      return <SignIn onRouteChange={this.onRouteChange} loadUser={this.loadUser}/>;
 
     if (this.state.route === routes.register)
-      return <Register onRouteChange={this.onRouteChange} />;
+      return <Register onRouteChange={this.onRouteChange} loadUser={this.loadUser}/>;
 
     return (
       <div className="center column-center">
         <Logo />
-        <Rank />
+        <Rank name={this.state.user.name} entries={this.state.user.entries}/>
         <ImageLinkForm
           onInputChange={this.onInputChange}
           onButtonSubmit={this.onSubmit}
