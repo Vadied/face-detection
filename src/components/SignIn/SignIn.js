@@ -1,8 +1,8 @@
-import React, { Component } from "react";
+import { Component } from "react";
 import { Form, Button } from "react-bootstrap";
 import "./_signIn.scss";
 
-import { routes } from "../../Constants";
+import { routes, baseUrl } from "../../Constants";
 
 class SignIn extends Component {
   constructor(props) {
@@ -24,11 +24,14 @@ class SignIn extends Component {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(params),
     };
-    fetch("http://localhost:3000/signin", data).then((user) => {
-      this.props.loadUser(user);
-      this.props.onRouteChange(routes.home);
+    
+    fetch(`${baseUrl}/signin`, data)
+      .then(response => response.json())
+      .then(user => {
+        this.props.loadUser(user);
+        this.props.onRouteChange(routes.home);
     });
-  };
+  }
 
   onEmailChange = (event) => {
     this.setState({ signInEmail: event.target.value });

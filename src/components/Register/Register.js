@@ -1,8 +1,8 @@
-import React, { Component } from "react";
+import { Component } from "react";
 import { Form, Button } from "react-bootstrap";
 import "./_register.scss";
 
-import { routes } from "../../Constants";
+import { routes, baseUrl } from "../../Constants";
 
 class Register extends Component {
   constructor(props) {
@@ -14,7 +14,7 @@ class Register extends Component {
     };
   }
 
-  onSubmitRegister = () => {
+  onSubmitRegister = async () => {
     const params = {
       email: this.state.registerEmail,
       password: this.state.registerPassword,
@@ -27,10 +27,11 @@ class Register extends Component {
       body: JSON.stringify(params),
     };
 
-    fetch("http://localhost:3000/register", data).then((user) => {
-      this.props.loadUser(user);
-      this.props.onRouteChange(routes.home);
-    });
+    const response = await fetch(`${baseUrl}/register`, data);
+    const user = await response.json();
+
+    this.props.loadUser(user);
+    this.props.onRouteChange(routes.home);
   };
 
   onNameChange = (event) => {
@@ -52,7 +53,7 @@ class Register extends Component {
           <Form.Group controlId="name">
             <Form.Label>Name</Form.Label>
             <Form.Control
-              type="email"
+              type="text"
               placeholder="Enter name"
               onChange={this.onNameChange}
             />

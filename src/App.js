@@ -4,7 +4,7 @@ import Particles from "react-particles-js";
 import Clarifai, { GENERAL_MODEL } from "clarifai";
 import { get } from "lodash";
 
-import { routes, clarifai_Api_Key } from "./Constants";
+import { routes, clarifai_Api_Key, baseUrl } from "./Constants";
 
 import Navigation from "./components/Navigation/Navigation";
 import Logo from "./components/Logo/Logo";
@@ -30,7 +30,6 @@ const particlesParams = {
   },
 };
 class App extends Component {
-
   constructor() {
     super();
     this.state = {
@@ -43,17 +42,18 @@ class App extends Component {
         id: "",
         name: "",
         email: "",
-        joined: '',
-        entries: 0
-      }
+        joined: "",
+        entries: 0,
+      },
     };
   }
 
-  clearState = () => this.setState({
-                      input: "",
-                      imageUrl: "",
-                      box: {},
-                    });
+  clearState = () =>
+    this.setState({
+      input: "",
+      imageUrl: "",
+      box: {},
+    });
 
   calculateFaceLocation = (region) => {
     const coordinates = get(region[0], "region_info.bounding_box", {});
@@ -68,11 +68,15 @@ class App extends Component {
     };
   };
 
-  displayFaceBox = (box) => this.setState({ box });
+  displayFaceBox = (data) => {
+    const regions = get(data, "outputs[0].data.regions", []);
+    const box = this.calculateFaceLocation(regions);
+    this.setState({ box });
+  };
 
   onInputChange = (event) => this.setState({ input: event.target.value });
 
-  onSubmit = async () => {
+  onButtonSubmit = async () => {
     this.setState({ imageUrl: this.state.input });
     this.clearState();
 
@@ -81,34 +85,56 @@ class App extends Component {
       this.state.input
     );
 
-    const regions = get(response, "outputs[0].data.regions", []);
-    const box = this.calculateFaceLocation(regions);
-    this.displayFaceBox(box);
+    if (!response) return;
+
+    this.displayFaceBox(response);
+
+    const params = {
+      id: this.state.user.id,
+    };
+
+    const data = {
+      method: "put",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(params),
+    };
+
+    const imageCount = await fetch(`${baseUrl}/image`, data);
+    if (imageCount)
+      this.setState(Object.assign(this.state.user), { entries: imageCount });
   };
 
   onRouteChange = (route) => {
-    this.setState({ 
+    console.log(route);
+    this.setState({
       route,
-      isSignedIn: route !== routes.signIn && route !== routes.register
+      isSignedIn: route !== routes.signIn && route !== routes.register,
     });
   };
 
-  loadUser = user => this.setState({ user });
+  loadUser = (user) => {
+    console.log('user', user);
+    this.setState({ user })
+  };
 
   showApp = () => {
     if (this.state.route === routes.signIn)
-      return <SignIn onRouteChange={this.onRouteChange} loadUser={this.loadUser}/>;
+      return (
+        <SignIn onRouteChange={this.onRouteChange} loadUser={this.loadUser} />
+      );
 
     if (this.state.route === routes.register)
-      return <Register onRouteChange={this.onRouteChange} loadUser={this.loadUser}/>;
+      return (
+        <Register onRouteChange={this.onRouteChange} loadUser={this.loadUser} />
+      );
 
     return (
       <div className="center column-center">
         <Logo />
-        <Rank name={this.state.user.name} entries={this.state.user.entries}/>
+        <Rank name={this.state.user.name} entries={this.state.user.entries} />
         <ImageLinkForm
           onInputChange={this.onInputChange}
-          onButtonSubmit={this.onSubmit}
+          onButtonSubmit={this.onButtonSubmit}
         />
         <FaceDetection imageUrl={this.state.imageUrl} box={this.state.box} />
       </div>
