@@ -1,11 +1,10 @@
 import { Component } from "react";
 import "./App.css";
 import Particles from "react-particles-js";
-import Clarifai, { GENERAL_MODEL } from "clarifai";
 import { get } from "lodash";
 import axios from "axios";
 
-import { routes, clarifai_Api_Key, baseUrl } from "./Constants";
+import { routes, baseUrl } from "./Constants";
 
 import Navigation from "./components/Navigation/Navigation";
 import Logo from "./components/Logo/Logo";
@@ -14,10 +13,6 @@ import Rank from "./components/Rank/Rank";
 import FaceDetection from "./components/FaceDetection/FaceDetection";
 import SignIn from "./components/SignIn/SignIn";
 import Register from "./components/Register/Register";
-
-const app = new Clarifai.App({
-  apiKey: clarifai_Api_Key,
-});
 
 const particlesParams = {
   particles: {
@@ -30,31 +25,28 @@ const particlesParams = {
     },
   },
 };
+
+const initialState = {
+  input: "",
+  imageUrl: "",
+  box: {},
+  route: routes.signIn,
+  isSignedIn: false,
+  user: {
+    id: 0,
+    name: "",
+    email: "",
+    joined: "",
+    entries: 0,
+  },
+};
 class App extends Component {
   constructor() {
     super();
-    this.state = {
-      input: "",
-      imageUrl: "",
-      box: {},
-      route: routes.signIn,
-      isSignedIn: false,
-      user: {
-        id: 19,
-        name: "dav",
-        email: "",
-        joined: "",
-        entries: 5,
-      },
-    };
+    this.state = initialState;
   }
 
-  clearState = () =>
-    this.setState({
-      input: "",
-      imageUrl: "",
-      box: {},
-    });
+  clearState = () => this.setState({ ...initialState });
 
   calculateFaceLocation = (region) => {
     const coordinates = get(region[0], "region_info.bounding_box", {});
@@ -77,36 +69,48 @@ class App extends Component {
 
   onInputChange = (event) => this.setState({ input: event.target.value });
 
-  onButtonSubmit = async () => {
-    this.setState({ imageUrl: this.state.input });
-    this.clearState();
-
-    const faceBoxData = await app.models.predict(
-      Clarifai.FACE_DETECT_MODEL,
-      this.state.input
-    );
-
-    if (!faceBoxData) return;
-
-    this.displayFaceBox(faceBoxData);
-
-    const params = {
-      id: this.state.user.id,
+  detectFace = async () => {
+    const config = {
+      method: "get",
+      url: `${baseUrl}/detection`,
+      headers: { "Content-Type": "application/json" },
+      data: { input: this.state.imageUrl },
     };
 
+    return axios(config);
+  };
+
+  updateEntries = async () => {
     const config = {
       method: "put",
       url: `${baseUrl}/image`,
       headers: { "Content-Type": "application/json" },
-      data: params,
+      data: {
+        id: this.state.user.id,
+      },
     };
+    return axios(config);
+  };
 
-    const { data } = await axios(config);
-    if (data) this.setState({ user: { ...this.state.user, entries: data } });
+  onButtonSubmit = async () => {
+    this.setState({ imageUrl: this.state.input });
+
+    try {
+      const faceBoxData = await this.detectFace();
+      if (!faceBoxData) return;
+
+      this.displayFaceBox(faceBoxData);
+
+      const { data } = await this.updateEntries();
+      if (data) this.setState({ user: { ...this.state.user, entries: data } });
+    } catch (err) {
+      console.log("error image", err);
+    }
   };
 
   onRouteChange = (route) => {
     this.setState({
+      ...initialState,
       route,
       isSignedIn: route !== routes.signIn && route !== routes.register,
     });
