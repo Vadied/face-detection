@@ -3,6 +3,7 @@ import "./App.css";
 import Particles from "react-particles-js";
 import Clarifai, { GENERAL_MODEL } from "clarifai";
 import { get } from "lodash";
+import axios from "axios";
 
 import { routes, clarifai_Api_Key, baseUrl } from "./Constants";
 
@@ -39,11 +40,11 @@ class App extends Component {
       route: routes.signIn,
       isSignedIn: false,
       user: {
-        id: "",
-        name: "",
+        id: 19,
+        name: "dav",
         email: "",
         joined: "",
-        entries: 0,
+        entries: 5,
       },
     };
   }
@@ -80,32 +81,31 @@ class App extends Component {
     this.setState({ imageUrl: this.state.input });
     this.clearState();
 
-    const response = await app.models.predict(
+    const faceBoxData = await app.models.predict(
       Clarifai.FACE_DETECT_MODEL,
       this.state.input
     );
 
-    if (!response) return;
+    if (!faceBoxData) return;
 
-    this.displayFaceBox(response);
+    this.displayFaceBox(faceBoxData);
 
     const params = {
       id: this.state.user.id,
     };
 
-    const data = {
+    const config = {
       method: "put",
+      url: `${baseUrl}/image`,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(params),
+      data: params,
     };
 
-    const imageCount = await fetch(`${baseUrl}/image`, data);
-    if (imageCount)
-      this.setState(Object.assign(this.state.user), { entries: imageCount });
+    const { data } = await axios(config);
+    if (data) this.setState({ user: { ...this.state.user, entries: data } });
   };
 
   onRouteChange = (route) => {
-    console.log(route);
     this.setState({
       route,
       isSignedIn: route !== routes.signIn && route !== routes.register,
@@ -113,8 +113,7 @@ class App extends Component {
   };
 
   loadUser = (user) => {
-    console.log('user', user);
-    this.setState({ user })
+    this.setState({ user });
   };
 
   showApp = () => {

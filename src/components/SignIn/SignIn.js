@@ -1,6 +1,7 @@
 import { Component } from "react";
 import { Form, Button } from "react-bootstrap";
 import "./_signIn.scss";
+import axios from "axios";
 
 import { routes, baseUrl } from "../../Constants";
 
@@ -13,25 +14,30 @@ class SignIn extends Component {
     };
   }
 
-  onSubmitSignIn = () => {
+  onSubmitSignIn = async (event) => {
+    event.preventDefault();
     const params = {
       email: this.state.signInEmail,
       password: this.state.signInPassword,
     };
 
-    const data = {
+    const config = {
       method: "post",
+      url: `${baseUrl}/signin`,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(params),
+      data: params,
     };
-    
-    fetch(`${baseUrl}/signin`, data)
-      .then(response => response.json())
-      .then(user => {
-        this.props.loadUser(user);
-        this.props.onRouteChange(routes.home);
-    });
-  }
+
+    try {
+      const { data } = await axios(config);
+      if (!data.id) return;
+
+      this.props.loadUser(data);
+      this.props.onRouteChange(routes.home);
+    } catch (e) {
+      console.log("register error", e);
+    }
+  };
 
   onEmailChange = (event) => {
     this.setState({ signInEmail: event.target.value });

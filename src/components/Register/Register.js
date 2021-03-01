@@ -1,5 +1,6 @@
 import { Component } from "react";
 import { Form, Button } from "react-bootstrap";
+import axios from "axios";
 import "./_register.scss";
 
 import { routes, baseUrl } from "../../Constants";
@@ -14,24 +15,30 @@ class Register extends Component {
     };
   }
 
-  onSubmitRegister = async () => {
+  onSubmitRegister = async (event) => {
+    event.preventDefault();
     const params = {
       email: this.state.registerEmail,
       password: this.state.registerPassword,
       name: this.state.registerName,
     };
 
-    const data = {
+    const config = {
       method: "post",
+      url: `${baseUrl}/register`,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(params),
+      data: params,
     };
 
-    const response = await fetch(`${baseUrl}/register`, data);
-    const user = await response.json();
+    try {
+      const { data } = await axios(config);
+      if (!data.id) return;
 
-    this.props.loadUser(user);
-    this.props.onRouteChange(routes.home);
+      this.props.loadUser(data);
+      this.props.onRouteChange(routes.home);
+    } catch (e) {
+      console.log("register error", e);
+    }
   };
 
   onNameChange = (event) => {
