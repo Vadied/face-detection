@@ -1,26 +1,20 @@
-import { Component } from "react";
 import { Form, Button } from "react-bootstrap";
-import axios from "axios";
 import "./_register.scss";
 
+import UserForm from "../userForm/UserForm";
 import { routes, baseUrl } from "../../Constants";
 
-class Register extends Component {
+class Register extends UserForm {
   constructor(props) {
     super(props);
-    this.state = {
-      registerName: "",
-      registerEmail: "",
-      registerPassword: "",
-    };
   }
 
-  onSubmitRegister = async (event) => {
+  register = async (event) => {
     event.preventDefault();
     const params = {
-      email: this.state.registerEmail,
-      password: this.state.registerPassword,
-      name: this.state.registerName,
+      email: this.state.formEmail,
+      password: this.state.formPassword,
+      name: this.state.formName,
     };
 
     const config = {
@@ -30,27 +24,7 @@ class Register extends Component {
       data: params,
     };
 
-    try {
-      const { data } = await axios(config);
-      if (!data.id) return;
-
-      this.props.loadUser(data);
-      this.props.onRouteChange(routes.home);
-    } catch (e) {
-      console.log("register error", e);
-    }
-  };
-
-  onNameChange = (event) => {
-    this.setState({ registerName: event.target.value });
-  };
-
-  onEmailChange = (event) => {
-    this.setState({ registerEmail: event.target.value });
-  };
-
-  onPasswordChange = (event) => {
-    this.setState({ registerPassword: event.target.value });
+    this.onSubmit(config);
   };
 
   render() {
@@ -84,11 +58,7 @@ class Register extends Component {
             />
           </Form.Group>
 
-          <Button
-            variant="primary"
-            type="submit"
-            onClick={this.onSubmitRegister}
-          >
+          <Button variant="primary" type="submit" onClick={this.register}>
             Register
           </Button>
         </Form>

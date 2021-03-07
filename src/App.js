@@ -29,7 +29,7 @@ const particlesParams = {
 const initialState = {
   input: "",
   imageUrl: "",
-  box: {},
+  boxes: [],
   route: routes.signIn,
   isSignedIn: false,
   user: {
@@ -48,37 +48,28 @@ class App extends Component {
 
   clearState = () => this.setState({ ...initialState });
 
-  calculateFaceLocation = (region) => {
-    const coordinates = get(region[0], "region_info.bounding_box", {});
+  calculateFaceLocation = (regions) => {
     const image = document.getElementById("input-image");
     const width = image.width;
     const height = image.height;
-    return {
-      leftCol: coordinates.left_col * width,
-      topRow: coordinates.top_row * height,
-      rightCol: (1 - coordinates.right_col) * width,
-      bottomRow: (1 - coordinates.bottom_row) * height,
-    };
+    return regions.map((r) => {
+      const coordinates = get(r, "region_info.bounding_box", {});
+      return {
+        leftCol: coordinates.left_col * width,
+        topRow: coordinates.top_row * height,
+        rightCol: (1 - coordinates.right_col) * width,
+        bottomRow: (1 - coordinates.bottom_row) * height,
+      };
+    });
   };
 
   displayFaceBox = (data) => {
     const regions = get(data, "outputs[0].data.regions", []);
-    const box = this.calculateFaceLocation(regions);
-    this.setState({ box });
+    const boxes = this.calculateFaceLocation(regions);
+    this.setState({ boxes });
   };
 
   onInputChange = (event) => this.setState({ input: event.target.value });
-
-  detectFace = async () => {
-    const config = {
-      method: "get",
-      url: `${baseUrl}/detection`,
-      headers: { "Content-Type": "application/json" },
-      data: { input: this.state.imageUrl },
-    };
-
-    return axios(config);
-  };
 
   updateEntries = async () => {
     const config = {
@@ -92,17 +83,29 @@ class App extends Component {
     return axios(config);
   };
 
+  detectFace = async (input) => {
+    const config = {
+      method: "post",
+      url: `${baseUrl}/detection`,
+      headers: { "Content-Type": "application/json" },
+      data: { input },
+    };
+
+    return axios(config);
+  };
+
   onButtonSubmit = async () => {
+    if (!this.state.input) return;
+
     this.setState({ imageUrl: this.state.input });
-
     try {
-      const faceBoxData = await this.detectFace();
-      if (!faceBoxData) return;
+      const { data } = await this.detectFace(this.state.input);
+      if (!data) return;
 
-      this.displayFaceBox(faceBoxData);
+      this.displayFaceBox(data);
 
-      const { data } = await this.updateEntries();
-      if (data) this.setState({ user: { ...this.state.user, entries: data } });
+      const { entries } = await this.updateEntries();
+      if (entries) this.setState({ user: { ...this.state.user, entries } });
     } catch (err) {
       console.log("error image", err);
     }
@@ -110,7 +113,6 @@ class App extends Component {
 
   onRouteChange = (route) => {
     this.setState({
-      ...initialState,
       route,
       isSignedIn: route !== routes.signIn && route !== routes.register,
     });
@@ -139,7 +141,10 @@ class App extends Component {
           onInputChange={this.onInputChange}
           onButtonSubmit={this.onButtonSubmit}
         />
-        <FaceDetection imageUrl={this.state.imageUrl} box={this.state.box} />
+        <FaceDetection
+          imageUrl={this.state.imageUrl}
+          boxes={this.state.boxes}
+        />
       </div>
     );
   };

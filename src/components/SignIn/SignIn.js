@@ -1,24 +1,19 @@
-import { Component } from "react";
 import { Form, Button } from "react-bootstrap";
 import "./_signIn.scss";
-import axios from "axios";
 
+import UserForm from "../userForm/UserForm";
 import { routes, baseUrl } from "../../Constants";
 
-class SignIn extends Component {
+class SignIn extends UserForm {
   constructor(props) {
     super(props);
-    this.state = {
-      signInEmail: "",
-      signInPassword: "",
-    };
   }
 
-  onSubmitSignIn = async (event) => {
+  signIn = async (event) => {
     event.preventDefault();
     const params = {
-      email: this.state.signInEmail,
-      password: this.state.signInPassword,
+      email: this.state.formEmail,
+      password: this.state.formPassword,
     };
 
     const config = {
@@ -28,23 +23,7 @@ class SignIn extends Component {
       data: params,
     };
 
-    try {
-      const { data } = await axios(config);
-      if (!data.id) return;
-
-      this.props.loadUser(data);
-      this.props.onRouteChange(routes.home);
-    } catch (e) {
-      console.log("register error", e);
-    }
-  };
-
-  onEmailChange = (event) => {
-    this.setState({ signInEmail: event.target.value });
-  };
-
-  onPasswordChange = (event) => {
-    this.setState({ signInPassword: event.target.value });
+    this.onSubmit(config);
   };
 
   render() {
@@ -69,7 +48,7 @@ class SignIn extends Component {
               onChange={this.onPasswordChange}
             />
           </Form.Group>
-          <Button variant="primary" type="submit" onClick={this.onSubmitSignIn}>
+          <Button variant="primary" type="submit" onClick={this.signIn}>
             Sign In
           </Button>
 
