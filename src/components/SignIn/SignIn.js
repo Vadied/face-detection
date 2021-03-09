@@ -2,7 +2,7 @@ import { Form, Button } from "react-bootstrap";
 import "./_signIn.scss";
 
 import UserForm from "../userForm/UserForm";
-import { routes, baseUrl } from "../../Constants";
+import { baseUrl } from "../../Constants";
 
 class SignIn extends UserForm {
   constructor(props) {
@@ -51,12 +51,6 @@ class SignIn extends UserForm {
           <Button variant="primary" type="submit" onClick={this.signIn}>
             Sign In
           </Button>
-
-          <Form.Group controlId="formRegister">
-            <Form.Text onClick={() => onRouteChange(routes.register)}>
-              Register
-            </Form.Text>
-          </Form.Group>
         </Form>
       </div>
     );

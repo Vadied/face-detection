@@ -1,4 +1,4 @@
-import { Component } from "react";
+import { useState, useEffect } from "react";
 import "./App.css";
 import Particles from "react-particles-js";
 import { get } from "lodash";
@@ -40,15 +40,21 @@ const initialState = {
     entries: 0,
   },
 };
-class App extends Component {
-  constructor() {
-    super();
-    this.state = initialState;
-  }
 
-  clearState = () => this.setState({ ...initialState });
+function App() {
+  const [input, setInput] = useState(initialState.input);
+  const [imageUrl, setImageUrl] = useState(initialState.imageUrl);
+  const [boxes, setBoxes] = useState(initialState.boxes);
+  const [route, setRoute] = useState(initialState.route);
+  const [isSignedIn, setIsSignedIn] = useState(initialState.isSignedIn);
+  const [user, setUser] = useState(initialState.user);
 
-  calculateFaceLocation = (regions) => {
+  // if empty [] useEffect apply only on "componentDidMount"
+  useEffect(() => {
+    console.log("if empty [] useEffect apply only on 'componentDidMount'");
+  }, []);
+
+  const calculateFaceLocation = (regions) => {
     const image = document.getElementById("input-image");
     const width = image.width;
     const height = image.height;
@@ -63,27 +69,27 @@ class App extends Component {
     });
   };
 
-  displayFaceBox = (data) => {
+  const displayFaceBox = (data) => {
     const regions = get(data, "outputs[0].data.regions", []);
-    const boxes = this.calculateFaceLocation(regions);
-    this.setState({ boxes });
+    const resBoxes = calculateFaceLocation(regions);
+    setBoxes(resBoxes);
   };
 
-  onInputChange = (event) => this.setState({ input: event.target.value });
+  const onInputChange = (event) => setInput(event.target.value);
 
-  updateEntries = async () => {
+  const updateEntries = async () => {
     const config = {
       method: "put",
       url: `${baseUrl}/image`,
       headers: { "Content-Type": "application/json" },
       data: {
-        id: this.state.user.id,
+        id: user.id,
       },
     };
     return axios(config);
   };
 
-  detectFace = async (input) => {
+  const detectFace = async (input) => {
     const config = {
       method: "post",
       url: `${baseUrl}/detection`,
@@ -94,73 +100,59 @@ class App extends Component {
     return axios(config);
   };
 
-  onButtonSubmit = async () => {
-    if (!this.state.input) return;
+  const onButtonSubmit = async () => {
+    if (!input) return;
 
-    this.setState({ imageUrl: this.state.input });
+    setImageUrl(input);
     try {
-      const { data } = await this.detectFace(this.state.input);
+      const { data } = await detectFace(input);
       if (!data) return;
 
-      this.displayFaceBox(data);
+      displayFaceBox(data);
 
-      const { entries } = await this.updateEntries();
-      if (entries) this.setState({ user: { ...this.state.user, entries } });
+      const { entries } = await updateEntries();
+      if (entries) setUser({ ...user, entries });
     } catch (err) {
       console.log("error image", err);
     }
   };
 
-  onRouteChange = (route) => {
-    this.setState({
-      route,
-      isSignedIn: route !== routes.signIn && route !== routes.register,
-    });
+  const onRouteChange = (inputRoute) => {
+    setRoute(inputRoute);
+    setIsSignedIn(
+      inputRoute !== routes.signIn && inputRoute !== routes.register
+    );
   };
 
-  loadUser = (user) => {
-    this.setState({ user });
-  };
+  const loadUser = (inputUser) => setUser(inputUser);
 
-  showApp = () => {
-    if (this.state.route === routes.signIn)
-      return (
-        <SignIn onRouteChange={this.onRouteChange} loadUser={this.loadUser} />
-      );
+  const showApp = () => {
+    if (route === routes.signIn)
+      return <SignIn onRouteChange={onRouteChange} loadUser={loadUser} />;
 
-    if (this.state.route === routes.register)
-      return (
-        <Register onRouteChange={this.onRouteChange} loadUser={this.loadUser} />
-      );
+    if (route === routes.register)
+      return <Register onRouteChange={onRouteChange} loadUser={loadUser} />;
 
     return (
       <div className="center column-center">
         <Logo />
-        <Rank name={this.state.user.name} entries={this.state.user.entries} />
+        <Rank name={user.name} entries={user.entries} />
         <ImageLinkForm
-          onInputChange={this.onInputChange}
-          onButtonSubmit={this.onButtonSubmit}
+          onInputChange={onInputChange}
+          onButtonSubmit={onButtonSubmit}
         />
-        <FaceDetection
-          imageUrl={this.state.imageUrl}
-          boxes={this.state.boxes}
-        />
+        <FaceDetection imageUrl={imageUrl} boxes={boxes} />
       </div>
     );
   };
 
-  render() {
-    return (
-      <div className="App center column-center">
-        <Particles className="particles" params={particlesParams} />
-        <Navigation
-          onRouteChange={this.onRouteChange}
-          isSignedIn={this.state.isSignedIn}
-        />
-        {this.showApp()}
-      </div>
-    );
-  }
+  return (
+    <div className="App center column-center">
+      <Particles className="particles" params={particlesParams} />
+      <Navigation onRouteChange={onRouteChange} isSignedIn={isSignedIn} />
+      {showApp()}
+    </div>
+  );
 }
 
 export default App;

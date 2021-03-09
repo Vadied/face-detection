@@ -2,9 +2,10 @@ import { Form, Button } from "react-bootstrap";
 import "./_register.scss";
 
 import UserForm from "../userForm/UserForm";
-import { routes, baseUrl } from "../../Constants";
+import { baseUrl } from "../../Constants";
 
 class Register extends UserForm {
+  
   constructor(props) {
     super(props);
   }
