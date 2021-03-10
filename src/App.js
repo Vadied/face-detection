@@ -3,8 +3,9 @@ import "./App.css";
 import Particles from "react-particles-js";
 import { get } from "lodash";
 import axios from "axios";
+import { useSelector, useDispatch, shallowEqual } from 'react-redux';
 
-import { routes, baseUrl } from "./Constants";
+import { ROUTES, BASE_URL, PARTICLES_PARAMS } from "./constants.js";
 
 import Navigation from "./components/Navigation/Navigation";
 import Logo from "./components/Logo/Logo";
@@ -14,40 +15,19 @@ import FaceDetection from "./components/FaceDetection/FaceDetection";
 import SignIn from "./components/SignIn/SignIn";
 import Register from "./components/Register/Register";
 
-const particlesParams = {
-  particles: {
-    number: {
-      value: 100,
-      density: {
-        enable: true,
-        value_area: 800,
-      },
-    },
-  },
-};
-
-const initialState = {
-  input: "",
-  imageUrl: "",
-  boxes: [],
-  route: routes.signIn,
-  isSignedIn: false,
-  user: {
-    id: 0,
-    name: "",
-    email: "",
-    joined: "",
-    entries: 0,
-  },
-};
+import { setUrlField, setImageUrl, setUser, setBoxes, setRoute, setIsSignedIn } from './actions.js';
 
 function App() {
-  const [input, setInput] = useState(initialState.input);
-  const [imageUrl, setImageUrl] = useState(initialState.imageUrl);
-  const [boxes, setBoxes] = useState(initialState.boxes);
-  const [route, setRoute] = useState(initialState.route);
-  const [isSignedIn, setIsSignedIn] = useState(initialState.isSignedIn);
-  const [user, setUser] = useState(initialState.user);
+  const dispatch = useDispatch();
+
+  const { urlField, imageUrl, boxes, route, isSignedIn, user } = useSelector(state => ({
+    urlField: state.appReducer.urlField,
+    imageUrl: state.appReducer.imageUrl,
+    boxes: state.appReducer.boxes,
+    route: state.appReducer.route,
+    isSignedIn: state.appReducer.isSignedIn,
+    user: state.appReducer.user,
+  }), shallowEqual);
 
   // if empty [] useEffect apply only on "componentDidMount"
   useEffect(() => {
@@ -72,15 +52,15 @@ function App() {
   const displayFaceBox = (data) => {
     const regions = get(data, "outputs[0].data.regions", []);
     const resBoxes = calculateFaceLocation(regions);
-    setBoxes(resBoxes);
+    dispatch(setBoxes(resBoxes));
   };
 
-  const onInputChange = (event) => setInput(event.target.value);
+  const onInputChange = (event) => dispatch(setUrlField(event.target.value));
 
   const updateEntries = async () => {
     const config = {
       method: "put",
-      url: `${baseUrl}/image`,
+      url: `${BASE_URL}/image`,
       headers: { "Content-Type": "application/json" },
       data: {
         id: user.id,
@@ -89,48 +69,48 @@ function App() {
     return axios(config);
   };
 
-  const detectFace = async (input) => {
+  const detectFace = async (urlField) => {
     const config = {
       method: "post",
-      url: `${baseUrl}/detection`,
+      url: `${BASE_URL}/detection`,
       headers: { "Content-Type": "application/json" },
-      data: { input },
+      data: { urlField },
     };
 
     return axios(config);
   };
 
   const onButtonSubmit = async () => {
-    if (!input) return;
+    if (!urlField) return;
 
-    setImageUrl(input);
+    dispatch(setImageUrl(urlField))
     try {
-      const { data } = await detectFace(input);
+      const { data } = await detectFace(urlField);
       if (!data) return;
 
       displayFaceBox(data);
 
       const { entries } = await updateEntries();
-      if (entries) setUser({ ...user, entries });
+      if (entries) dispatch(setUser({ ...user, entries }));
     } catch (err) {
       console.log("error image", err);
     }
   };
 
   const onRouteChange = (inputRoute) => {
-    setRoute(inputRoute);
-    setIsSignedIn(
-      inputRoute !== routes.signIn && inputRoute !== routes.register
-    );
+    dispatch(setRoute(inputRoute));
+    dispatch(setIsSignedIn(
+      inputRoute !== ROUTES.signIn && inputRoute !== ROUTES.register
+    ));
   };
 
-  const loadUser = (inputUser) => setUser(inputUser);
+  const loadUser = (inputUser) => dispatch(setUser(inputUser));
 
   const showApp = () => {
-    if (route === routes.signIn)
+    if (route === ROUTES.signIn)
       return <SignIn onRouteChange={onRouteChange} loadUser={loadUser} />;
 
-    if (route === routes.register)
+    if (route === ROUTES.register)
       return <Register onRouteChange={onRouteChange} loadUser={loadUser} />;
 
     return (
@@ -148,7 +128,7 @@ function App() {
 
   return (
     <div className="App center column-center">
-      <Particles className="particles" params={particlesParams} />
+      <Particles className="particles" params={PARTICLES_PARAMS} />
       <Navigation onRouteChange={onRouteChange} isSignedIn={isSignedIn} />
       {showApp()}
     </div>

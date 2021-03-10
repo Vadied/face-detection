@@ -1,7 +1,7 @@
 import { Component } from "react";
 import axios from "axios";
 
-import { routes } from "../../Constants";
+import { ROUTES } from "../../constants.js";
 
 class UserForm extends Component {
   constructor(props) {
@@ -19,7 +19,7 @@ class UserForm extends Component {
       if (!data.id) return;
 
       this.props.loadUser(data);
-      this.props.onRouteChange(routes.home);
+      this.props.onRouteChange(ROUTES.home);
     } catch (e) {
       console.log("register error", e);
     }

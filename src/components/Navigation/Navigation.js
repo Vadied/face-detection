@@ -1,14 +1,14 @@
 import React from "react";
 import "./_navigation.scss";
 
-import { routes } from "../../Constants";
+import { ROUTES } from "../../constants.js";
 
 const Navigation = ({ onRouteChange, isSignedIn }) => {
   if (isSignedIn)
     return (
       <nav className="navigation">
         <p
-          onClick={() => onRouteChange(routes.signIn)}
+          onClick={() => onRouteChange(ROUTES.signIn)}
           className="navigation-text"
         >
           Sign Out
@@ -20,13 +20,13 @@ const Navigation = ({ onRouteChange, isSignedIn }) => {
     <div>
       <nav className="navigation">
         <p
-          onClick={() => onRouteChange(routes.signIn)}
+          onClick={() => onRouteChange(ROUTES.signIn)}
           className="navigation-text"
         >
           Sign In
         </p>
         <p
-          onClick={() => onRouteChange(routes.register)}
+          onClick={() => onRouteChange(ROUTES.register)}
           className="navigation-text"
         >
           Register

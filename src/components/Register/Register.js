@@ -2,7 +2,7 @@ import { Form, Button } from "react-bootstrap";
 import "./_register.scss";
 
 import UserForm from "../userForm/UserForm";
-import { baseUrl } from "../../Constants";
+import { BASE_URL } from "../../constants.js";
 
 class Register extends UserForm {
   
@@ -20,7 +20,7 @@ class Register extends UserForm {
 
     const config = {
       method: "post",
-      url: `${baseUrl}/register`,
+      url: `${BASE_URL}/register`,
       headers: { "Content-Type": "application/json" },
       data: params,
     };

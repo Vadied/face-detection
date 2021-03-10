@@ -2,7 +2,7 @@ import { Form, Button } from "react-bootstrap";
 import "./_signIn.scss";
 
 import UserForm from "../userForm/UserForm";
-import { baseUrl } from "../../Constants";
+import { BASE_URL } from "../../constants.js";
 
 class SignIn extends UserForm {
   constructor(props) {
@@ -18,7 +18,7 @@ class SignIn extends UserForm {
 
     const config = {
       method: "post",
-      url: `${baseUrl}/signin`,
+      url: `${BASE_URL}/signin`,
       headers: { "Content-Type": "application/json" },
       data: params,
     };
