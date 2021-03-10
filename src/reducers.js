@@ -1,6 +1,6 @@
 import { CHANGE_URL_FIELD, CHANGE_IMAGE_URL, CHANGE_USER, CHANGE_BOXES, CHANGE_ROUTE, CHANGE_IS_SIGNED_IN, ROUTES,
 CHANGE_BOXES_PENDING,
-CHANGE_BOXES_SUCCCESS,
+CHANGE_BOXES_SUCCESS,
 CHANGE_BOXES_FAILURE } from "./constants.js";
 
 const initialState = {
@@ -46,7 +46,7 @@ export const boxesReducer = (state = initialStateBoxes, action = {}) => {
     switch(action.type) {
         case CHANGE_BOXES_PENDING:
             return {...state, isPending: true};
-        case CHANGE_BOXES_SUCCCESS:
+        case CHANGE_BOXES_SUCCESS:
             return {...state, boxes: action.payload, isPending: false};
         case CHANGE_BOXES_FAILURE:
             return {...state, error: action.payload, isPending: false};
